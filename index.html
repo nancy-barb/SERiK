@@ -33,7 +33,14 @@
 
     <div id="navigation" style="display: none;">
     <h2>Cíl</h2>
-
+<div id="arrow"
+     style="
+        font-size: 100px;
+        text-align: center;
+        transition: transform 0.2s linear;
+     ">
+    ↑
+</div>
     <p>
         Vzdálenost:
         <strong id="distance">–</strong> m
@@ -61,7 +68,9 @@
             latitude: 49.9935189,
             longitude: 14.6600694
         };
-
+let currentBearing = null;
+let currentHeading = null;
+        
         startButton.addEventListener("click", startGPS);
 
         function startGPS() {
@@ -161,6 +170,8 @@ startCompass();
         target.latitude,
         target.longitude
     );
+            currentBearing = bearing;
+updateArrow();
 
     document.getElementById("distance").textContent =
         Math.round(distance);
@@ -232,12 +243,30 @@ function handleOrientation(event) {
     }
 
     heading = (heading + 360) % 360;
+    currentHeading = heading;
+updateArrow();
 
     const roundedHeading = 
         (Math.round(heading / 5) * 5) % 360;
 
 document.getElementById("heading").textContent =
     roundedHeading;
+}
+
+
+// OTÁČENÍ ŠIPKY
+function updateArrow() {
+
+    if (currentBearing === null || currentHeading === null) {
+        return;
+    }
+
+    let rotation = currentBearing - currentHeading;
+
+    rotation = (rotation + 360) % 360;
+
+    document.getElementById("arrow").style.transform =
+        `rotate(${rotation}deg)`;
 }
         
         function positionError(error) {
