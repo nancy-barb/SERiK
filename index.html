@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPS Navigator</title>
+    <title>ŠEŘíK</title>
 </head>
 
 <body>
 
-    <h1>GPS Navigator</h1>
+    <h1>Kudy k dalšímu stanovišti?</h1>
 
     <p id="status">GPS zatím není spuštěná.</p>
 
@@ -233,8 +233,11 @@ function handleOrientation(event) {
 
     heading = (heading + 360) % 360;
 
-    document.getElementById("heading").textContent =
-        Math.round(heading);
+    const roundedHeading = 
+        (Math.round(heading / 5) * 5) % 360;
+
+document.getElementById("heading").textContent =
+    roundedHeading;
 }
         
         function positionError(error) {
