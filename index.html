@@ -7,7 +7,86 @@
 </head>
 
 <body>
+
     <h1>GPS Navigator</h1>
-    <p>Jestli tohle vidíš, GitHub Pages funguje! 🎉</p>
+
+    <p id="status">GPS zatím není spuštěná.</p>
+
+    <button id="startButton">Spustit GPS</button>
+
+    <div id="position" style="display: none;">
+        <p>
+            Zeměpisná šířka:
+            <strong id="latitude">–</strong>
+        </p>
+
+        <p>
+            Zeměpisná délka:
+            <strong id="longitude">–</strong>
+        </p>
+
+        <p>
+            Přesnost:
+            <strong id="accuracy">–</strong> m
+        </p>
+    </div>
+
+    <script>
+        const startButton = document.getElementById("startButton");
+        const status = document.getElementById("status");
+        const position = document.getElementById("position");
+
+        startButton.addEventListener("click", startGPS);
+
+        function startGPS() {
+
+            if (!navigator.geolocation) {
+                status.textContent = "Tento telefon nepodporuje geolokaci.";
+                return;
+            }
+
+            status.textContent = "Hledám polohu…";
+
+            navigator.geolocation.watchPosition(
+                updatePosition,
+                positionError,
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 0,
+                    timeout: 15000
+                }
+            );
+        }
+
+        function updatePosition(data) {
+
+            document.getElementById("latitude").textContent =
+                data.coords.latitude.toFixed(6);
+
+            document.getElementById("longitude").textContent =
+                data.coords.longitude.toFixed(6);
+
+            document.getElementById("accuracy").textContent =
+                Math.round(data.coords.accuracy);
+
+            position.style.display = "block";
+
+            status.textContent = "GPS aktivní.";
+        }
+
+        function positionError(error) {
+
+            if (error.code === 1) {
+                status.textContent = "Přístup k poloze nebyl povolen.";
+            } else if (error.code === 2) {
+                status.textContent = "Polohu se nepodařilo zjistit.";
+            } else if (error.code === 3) {
+                status.textContent = "Zjišťování polohy trvalo příliš dlouho.";
+            } else {
+                status.textContent = "Nastala chyba GPS.";
+            }
+        }
+    </script>
+
 </body>
 </html>
