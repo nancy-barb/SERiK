@@ -43,6 +43,11 @@
         Azimut:
         <strong id="bearing">–</strong>°
     </p>
+
+   <p>
+    Směr telefonu:
+    <strong id="heading">–</strong>°
+</p>
 </div>
 
     <script>
@@ -67,7 +72,7 @@
             }
 
             status.textContent = "Hledám polohu…";
-
+startCompass();
             navigator.geolocation.watchPosition(
                 updatePosition,
                 positionError,
@@ -166,6 +171,72 @@
     navigation.style.display = "block";
 }
 
+        function startCompass() {
+
+    if (typeof DeviceOrientationEvent === "undefined") {
+        document.getElementById("heading").textContent =
+            "nepodporováno";
+        return;
+    }
+
+    // iPhone / iPad – vyžaduje explicitní povolení
+    if (typeof DeviceOrientationEvent.requestPermission === "function") {
+
+        DeviceOrientationEvent.requestPermission()
+            .then(function(permissionState) {
+
+                if (permissionState === "granted") {
+                    window.addEventListener(
+                        "deviceorientation",
+                        handleOrientation,
+                        true
+                    );
+                }
+
+            })
+            .catch(console.error);
+
+    } else {
+
+        // Android a zařízení, která zvláštní povolení nepotřebují
+        window.addEventListener(
+            "deviceorientationabsolute",
+            handleOrientation,
+            true
+        );
+
+        window.addEventListener(
+            "deviceorientation",
+            handleOrientation,
+            true
+        );
+    }
+}
+
+function handleOrientation(event) {
+
+    let heading;
+
+    // Safari na iPhone
+    if (event.webkitCompassHeading !== undefined) {
+
+        heading = event.webkitCompassHeading;
+
+    // Android / ostatní
+    } else if (event.alpha !== null) {
+
+        heading = 360 - event.alpha;
+
+    } else {
+        return;
+    }
+
+    heading = (heading + 360) % 360;
+
+    document.getElementById("heading").textContent =
+        Math.round(heading);
+}
+        
         function positionError(error) {
 
             if (error.code === 1) {
