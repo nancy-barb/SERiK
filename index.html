@@ -31,16 +31,27 @@
         </p>
     </div>
 
+    <div id="navigation" style="display: none;">
+        <h2>Cíl</h2>
+
+        <p>
+            Vzdálenost:
+            <strong id="distance">–</strong> m
+        </p>
+    </div>
+
     <script>
         const startButton = document.getElementById("startButton");
         const status = document.getElementById("status");
         const position = document.getElementById("position");
+        const navigation = document.getElementById("navigation");
 
-const target = {
-    latitude: 49.9935189,
-    longitude: 14.6600694
-};
-        
+        // Testovací cíl
+        const target = {
+            latitude: 49.9935189,
+            longitude: 14.6600694
+        };
+
         startButton.addEventListener("click", startGPS);
 
         function startGPS() {
@@ -65,32 +76,85 @@ const target = {
 
         function updatePosition(data) {
 
+            const latitude = data.coords.latitude;
+            const longitude = data.coords.longitude;
+
             document.getElementById("latitude").textContent =
-                data.coords.latitude.toFixed(6);
+                latitude.toFixed(6);
 
             document.getElementById("longitude").textContent =
-                data.coords.longitude.toFixed(6);
+                longitude.toFixed(6);
 
             document.getElementById("accuracy").textContent =
                 Math.round(data.coords.accuracy);
 
             position.style.display = "block";
-
             status.textContent = "GPS aktivní.";
+
+            updateDistance(latitude, longitude);
         }
+
+
+        // Spočítá vzdálenost mezi dvěma GPS body
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+
+            const R = 6371000;
+
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+            const a =
+                Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+
+            const c =
+                2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            return R * c;
+        }
+
+
+        // Aktualizuje vzdálenost z telefonu k cíli
+        function updateDistance(latitude, longitude) {
+
+            const distance = calculateDistance(
+                latitude,
+                longitude,
+                target.latitude,
+                target.longitude
+            );
+
+            document.getElementById("distance").textContent =
+                Math.round(distance);
+
+            navigation.style.display = "block";
+        }
+
 
         function positionError(error) {
 
             if (error.code === 1) {
-                status.textContent = "Přístup k poloze nebyl povolen.";
+                status.textContent =
+                    "Přístup k poloze nebyl povolen.";
+
             } else if (error.code === 2) {
-                status.textContent = "Polohu se nepodařilo zjistit.";
+                status.textContent =
+                    "Polohu se nepodařilo zjistit.";
+
             } else if (error.code === 3) {
-                status.textContent = "Zjišťování polohy trvalo příliš dlouho.";
+                status.textContent =
+                    "Zjišťování polohy trvalo příliš dlouho.";
+
             } else {
-                status.textContent = "Nastala chyba GPS.";
+                status.textContent =
+                    "Nastala chyba GPS.";
             }
         }
+
     </script>
 
 </body>
