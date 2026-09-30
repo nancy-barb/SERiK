@@ -32,13 +32,18 @@
     </div>
 
     <div id="navigation" style="display: none;">
-        <h2>Cíl</h2>
+    <h2>Cíl</h2>
 
-        <p>
-            Vzdálenost:
-            <strong id="distance">–</strong> m
-        </p>
-    </div>
+    <p>
+        Vzdálenost:
+        <strong id="distance">–</strong> m
+    </p>
+
+    <p>
+        Azimut:
+        <strong id="bearing">–</strong>°
+    </p>
+</div>
 
     <script>
         const startButton = document.getElementById("startButton");
@@ -117,23 +122,49 @@
             return R * c;
         }
 
+        function calculateBearing(lat1, lon1, lat2, lon2) {
+
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+    const y = Math.sin(Δλ) * Math.cos(φ2);
+
+    const x =
+        Math.cos(φ1) * Math.sin(φ2) -
+        Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+
+    const bearing =
+        Math.atan2(y, x) * 180 / Math.PI;
+
+    return (bearing + 360) % 360;
+}
 
         // Aktualizuje vzdálenost z telefonu k cíli
         function updateDistance(latitude, longitude) {
 
-            const distance = calculateDistance(
-                latitude,
-                longitude,
-                target.latitude,
-                target.longitude
-            );
+    const distance = calculateDistance(
+        latitude,
+        longitude,
+        target.latitude,
+        target.longitude
+    );
 
-            document.getElementById("distance").textContent =
-                Math.round(distance);
+    const bearing = calculateBearing(
+        latitude,
+        longitude,
+        target.latitude,
+        target.longitude
+    );
 
-            navigation.style.display = "block";
-        }
+    document.getElementById("distance").textContent =
+        Math.round(distance);
 
+    document.getElementById("bearing").textContent =
+        Math.round(bearing);
+
+    navigation.style.display = "block";
+}
 
         function positionError(error) {
 
