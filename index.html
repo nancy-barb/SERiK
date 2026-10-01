@@ -228,29 +228,55 @@ function handleOrientation(event) {
 
     let heading;
 
-    // Safari na iPhone
+    // iPhone má vlastní kompasovou hodnotu.
+    // Pokud je dostupná, je nejlepší ji použít přímo.
     if (event.webkitCompassHeading !== undefined) {
 
         heading = event.webkitCompassHeading;
 
-    // Android / ostatní
-    } else if (event.alpha !== null) {
-
-        heading = 360 - event.alpha;
-
     } else {
-        return;
+
+        // Android / ostatní zařízení
+        const alpha = event.alpha;
+        const beta = event.beta;
+        const gamma = event.gamma;
+
+        if (alpha === null || beta === null || gamma === null) {
+            return;
+        }
+
+        // Převod na radiány
+        const alphaRad = alpha * Math.PI / 180;
+        const betaRad = beta * Math.PI / 180;
+        const gammaRad = gamma * Math.PI / 180;
+
+        // Kompenzace náklonu telefonu
+        const x =
+            -Math.cos(alphaRad) * Math.sin(gammaRad)
+            - Math.sin(alphaRad) *
+              Math.sin(betaRad) *
+              Math.cos(gammaRad);
+
+        const y =
+            -Math.sin(alphaRad) * Math.sin(gammaRad)
+            + Math.cos(alphaRad) *
+              Math.sin(betaRad) *
+              Math.cos(gammaRad);
+
+        heading = Math.atan2(x, y) * 180 / Math.PI;
+
+        heading = (heading + 360) % 360;
     }
 
-    heading = (heading + 360) % 360;
     currentHeading = heading;
-updateArrow();
 
-    const roundedHeading = 
+    updateArrow();
+
+    const roundedHeading =
         (Math.round(heading / 5) * 5) % 360;
 
-document.getElementById("heading").textContent =
-    roundedHeading;
+    document.getElementById("heading").textContent =
+        roundedHeading;
 }
 
 
